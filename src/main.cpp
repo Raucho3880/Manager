@@ -5,6 +5,15 @@
 
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 
+
+#include <LittleFS.h>
+FSInfo fs_info;
+#define FLASH_MAP_SETUP_CONFIG(FLASH_MAP_OTA_FS) // Scetch:1M, OTA:1M, FS:2M 
+// FLASH_MAP_MAX_FS  // Scetch:1M, OTA:1M, FS:2M 
+// FLASH_MAP_NO_FS
+
+
+
 //needed for library
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
@@ -113,9 +122,31 @@ wifiManager.addParameter(&custom_text);  // agrega texto debajo de las Wifis esc
   */ 
   ArduinoOTA.begin();
 
+
+/*  
+  Habilito el FS
+  */ 
+if ( LittleFS.begin() ) {
+ Serial.println("El LittleFS se monto adecuedamente");   
+ } else {  
+   // Asumo que no esta formateado.... 
+   if (  LittleFS.format() ) {
+     if ( ! LittleFS.begin() ) {
+      Serial.println("*** Fallo el montaje e LittleFS luego del formateo");   
+    } 
+   }
+   else {
+    Serial.println("*** Fallo Formateo del lFS");   
+   }  
+  }
+
+
+
 /*  
   Ahora levanto el WebServer.... 
-  */ 
+  */
+ 	
+   WebServer.on("/", WebServer_RootPath); 
    WebServer.onNotFound(WebServer_NotFount); 
    // Ruteo para URI desconocida
    WebServer.on("/service/hostStatus", Web_hostStatus);
