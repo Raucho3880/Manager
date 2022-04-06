@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #include <TimeLib.h>
 #include <NTPClient.h>
-
+#include <Regexp.h>
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 
 
@@ -17,6 +17,10 @@ FSInfo fs_info;
 //needed for library
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
+
+#include <uri/UriBraces.h>
+#include <uri/UriRegex.h>
+
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
 // =========================================
@@ -147,11 +151,12 @@ if ( LittleFS.begin() ) {
   */
  	
    WebServer.on("/", WebServer_RootPath); 
+   WebServer.on("/service/hostStatus", Web_hostStatus);
+
+
    WebServer.onNotFound(WebServer_NotFount); 
    // Ruteo para URI desconocida
-   WebServer.on("/service/hostStatus", Web_hostStatus);
    
-      WebServer.onNotFound(WebServer_NotFount); 
    
    WebServer.begin();
    Serial.println("HTTP server started");    

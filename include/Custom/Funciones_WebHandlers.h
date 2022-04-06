@@ -4,7 +4,45 @@ void Web_SendFile(fs::FS &fs, const char * Filename) {
 
 
 WebServer.setContentLength(CONTENT_LENGTH_UNKNOWN);
-WebServer.send ( 200, "text/html", " ");
+
+// char *lFilename = strdup(Filename); 
+strcpy(WK100, Filename);
+
+
+MatchState ms;
+ms.Target (WK100);  // set its address
+
+
+// Serial.println(WK100 ); 
+bool HeaderOK=false; 
+
+if ( ms.Match ("%phtml$") ) {
+  WebServer.send ( 200, "text/html", " ");
+//  Serial.println("Encuentra html"); 
+  HeaderOK=true; 
+  }
+
+if ( ms.Match ("%pcss$") ) {
+  WebServer.send ( 200, "text/css", " ");
+//  Serial.println("Encuentra css"); 
+  HeaderOK=true; 
+  }
+
+if ( ms.Match ("%pico$") ) {
+  WebServer.send ( 200, "image/x-icon", "");
+//  Serial.println("Encuentra css"); 
+  HeaderOK=true; 
+  }
+
+
+
+if ( ! HeaderOK ) {
+  WebServer.send ( 200, "text/txt", " ");
+  Serial.println("No encuentra nada"); 
+  HeaderOK=true; 
+}
+
+
 
 
 
@@ -22,6 +60,7 @@ if (fs.exists(Filename) ) {
      }
   WebServer.sendContent("");  
   file.close();  
+//   Serial.println("Devuelvo pagina web");
   } else {
 
    Serial.println("No se encuentra el archivo solicitado"); 
@@ -43,15 +82,29 @@ void WebServer_NotFount() {
 
 
 
+// https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WebServer/README.rst
 
-Serial.println("Pasa por peticion web...Dirlist:"); 
 
-Dir dir = LittleFS.openDir("/");
-while (dir.next()) {
-  Serial.println(dir.fileName());
+// Serial.println(   WebServer._currentUri()    );
+// Serial.println(   WebServer.uri() ); 
+
+if (  LittleFS.exists( WebServer.uri()) ) {
+  String File=String(WebServer.uri());  
+  char s[30];
+  File.toCharArray(s  , 30);  
+  Web_SendFile(LittleFS,s); 
+  return;
+//  Serial.println(   s ); 
+    
   }
 
-
+if (  WebServer.args() > 0 )   {
+  Serial.println(   WebServer.args() );  
+  for (int i = 0; i < WebServer.args(); i++) {
+    Serial.println( "Argumento:" + String(WebServer.argName(i))  +  ", valor:"  +   String(WebServer.arg(i))  );  
+//     Serial.println(   WebServer.arg(i) );   
+    }
+  }
 
 
 
