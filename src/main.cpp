@@ -4,6 +4,7 @@
 #include <NTPClient.h>
 #include <Regexp.h>
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+// ADC_MODE(ADC_VCC); //vcc read
 
 
 #include <LittleFS.h>
@@ -28,6 +29,7 @@ FSInfo fs_info;
 Ticker flipper;
 // =========================================
 #include "ArduinoOTA.h"
+
 // =========================================
 #include <Custom/Headers.h>
 // =========================================
@@ -55,12 +57,23 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", C_NTP_UTC_OFSET,C_NTP_REFRESH_INTER
 
 #include <Custom/Funciones_WebHandlers.h>
 
+#include <Sensado/MuestroDatosSensado.h>
+
+
 
 
 
 
 void setup() {
     // put your setup code here, to run once:
+
+
+Elementos[0].Nombre="SensorA"; 
+Elementos[0].Valor=2; 
+Elementos[1].Nombre="Elementos"; 
+Elementos[1].Valor=sizeof(Elementos) ; 
+
+
 
 
     Serial.begin(115200);
@@ -124,8 +137,10 @@ wifiManager.addParameter(&custom_text);  // agrega texto debajo de las Wifis esc
 /*  
   Ahora Habilito OTA
   */ 
+  ArduinoOTA.onStart([]() {  // switch off all the PWMs during upgrade
+    flipper.attach(0.05, onTick_ChageLed);
+  });
   ArduinoOTA.begin();
-
 
 /*  
   Habilito el FS
@@ -151,7 +166,8 @@ if ( LittleFS.begin() ) {
   */
  	
    WebServer.on("/", WebServer_RootPath); 
-   WebServer.on("/service/hostStatus", Web_hostStatus);
+   WebServer.on("/service/hostStatus.json", Web_hostStatus);
+   WebServer.on("/service/getSensores.json", Web_getSensores);
 
 
    WebServer.onNotFound(WebServer_NotFount); 
