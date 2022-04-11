@@ -5,7 +5,9 @@
 #include <Regexp.h>
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 // ADC_MODE(ADC_VCC); //vcc read
-
+/*
+Subsistema de riego
+  */ 
 
 #include <LittleFS.h>
 FSInfo fs_info;
